@@ -372,9 +372,9 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow
       {/* Background Soft Aura Glow */}
       {neonGlow && (
         <div 
-          className="absolute w-20 h-20 rounded-full blur-xl opacity-50 pointer-events-none -translate-y-6 animate-pulse"
+          className="absolute w-24 h-24 rounded-full blur-2xl opacity-70 pointer-events-none -translate-y-6 animate-pulse"
           style={{
-            background: `radial-gradient(circle, ${color} 0%, transparent 68%)`
+            background: `radial-gradient(circle, ${color} 0%, transparent 75%)`
           }}
         />
       )}
@@ -391,11 +391,19 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow
             style={{
               transform: 'translateX(-50%)',
               borderColor: color,
-              boxShadow: neonGlow
-                ? `0 0 20px ${color}, 0 4px 12px rgba(0,0,0,0.8), inset 0 0 8px ${color}45`
-                : `0 8px 24px ${color}60, 0 0 12px ${color}40`,
+              boxShadow: `inset 0 0 10px ${color}65, 0 8px 32px rgba(0,0,0,0.85)`,
             }}
           >
+            {/* Bubble Neon Glow Backplate (extremely bright blur aura) */}
+            {neonGlow && (
+              <div 
+                className="absolute -inset-[3px] rounded-2xl blur-[6px] pointer-events-none opacity-85 -z-10 animate-pulse"
+                style={{
+                  background: color,
+                }}
+              />
+            )}
+
             {/* Small pointed arrow down */}
             <div 
               className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent"
@@ -445,55 +453,97 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow
           repeatType: 'reverse',
           ease: 'easeInOut',
         }}
-        className="w-14 h-14 relative"
+        className="w-14 h-14 relative flex items-center justify-center"
         style={{
           filter: neonGlow
             ? `drop-shadow(0 0 12px ${color}) drop-shadow(0 0 4px ${color}) drop-shadow(0 0 2px #ffffff)`
             : `drop-shadow(0 0 8px ${color}dd) drop-shadow(0 0 3px rgba(255, 255, 255, 0.4))`,
         }}
       >
+        {/* Core Neon Glow Aura (Moves with character bounce!) */}
+        {neonGlow && (
+          <>
+            {/* Extended Outer Cosmic Aura (renders even with hardware accel off!) */}
+            <div 
+              className="absolute w-28 h-28 rounded-full blur-2xl pointer-events-none opacity-90 transition-opacity"
+              style={{
+                background: `radial-gradient(circle, ${color} 0%, ${color}66 35%, transparent 70%)`,
+                transform: 'scale(1.3)',
+                zIndex: -2,
+              }}
+            />
+            {/* Brighter Mid-Aura */}
+            <div 
+              className="absolute w-22 h-22 rounded-full blur-xl pointer-events-none opacity-95 transition-opacity"
+              style={{
+                background: `radial-gradient(circle, ${color} 0%, ${color}aa 40%, transparent 70%)`,
+                transform: 'scale(1.15)',
+                zIndex: -1,
+              }}
+            />
+            {/* White Hot Spot Center Layer for intense neon emission effect */}
+            <div 
+              className="absolute w-14 h-14 rounded-full blur-md pointer-events-none opacity-60 transition-opacity"
+              style={{
+                background: `radial-gradient(circle, #ffffff 0%, ${color} 65%, transparent 100%)`,
+                zIndex: -1,
+              }}
+            />
+          </>
+        )}
+
         {renderAvatarBody()}
       </motion.div>
 
       {/* Text / Username details */}
-      <div className="mt-2 flex flex-col items-center">
-        <div
-          className={`px-2.5 py-1 text-white rounded-lg flex items-center gap-1.5 border-2 shadow-lg max-w-32 truncate hover:scale-105 transition-transform ${
-            isVip
-              ? 'bg-gradient-to-r from-amber-500 via-pink-500 to-rose-500 border-yellow-300 font-extrabold text-[11px] animate-pulse'
-              : 'bg-slate-950/95 text-[10.5px]'
-          }`}
-          style={
-            !isVip
-              ? {
-                  borderColor: color,
-                  boxShadow: neonGlow
-                    ? `0 0 15px ${color}, inset 0 0 6px ${color}45`
-                    : `0 0 8px ${color}b0, inset 0 0 4px ${color}30`,
-                }
-              : {
-                  boxShadow: neonGlow
-                    ? '0 0 20px rgba(245, 158, 11, 0.9), inset 0 1px 2px rgba(255,255,255,0.3)'
-                    : '0 0 12px rgba(245, 158, 11, 0.8), inset 0 1px 1px rgba(255,255,255,0.2)',
-                  textShadow: '0 1.5px 3px rgba(0,0,0,0.8)',
-                }
-          }
-        >
-          {isVip ? (
-            <Star size={11} className="fill-yellow-300 text-yellow-300 shrink-0 animate-bounce" />
-          ) : (
-            <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: color }} />
+      <div className="mt-2 flex flex-col items-center relative">
+        <div className="relative">
+          {/* Intense Outer Badge Glow Backdrop */}
+          {neonGlow && (
+            <div 
+              className="absolute -inset-[2px] rounded-lg blur-[6px] pointer-events-none opacity-90 transition-all animate-pulse"
+              style={{
+                background: isVip 
+                  ? 'linear-gradient(to right, #f59e0b, #ec4899, #f43f5e)'
+                  : color,
+              }}
+            />
           )}
-          <span className="truncate font-sans font-black tracking-wide">
-            @{uniqueId}
-          </span>
+
+          <div
+            className={`relative px-2.5 py-1 text-white rounded-lg flex items-center gap-1.5 border-2 shadow-xl max-w-32 truncate hover:scale-105 transition-transform ${
+              isVip
+                ? 'bg-gradient-to-r from-amber-500 via-pink-500 to-rose-500 border-yellow-300 font-extrabold text-[11px] animate-pulse'
+                : 'bg-slate-950 text-[10.5px]'
+            }`}
+            style={
+              !isVip
+                ? {
+                    borderColor: color,
+                    boxShadow: `inset 0 0 8px ${color}60, 0 4px 10px rgba(0,0,0,0.85)`,
+                  }
+                : {
+                    textShadow: '0 1.5px 3px rgba(0,0,0,0.8)',
+                    boxShadow: 'inset 0 0 8px rgba(255,255,255,0.4), 0 4px 10px rgba(0,0,0,0.85)'
+                  }
+            }
+          >
+            {isVip ? (
+              <Star size={11} className="fill-yellow-300 text-yellow-300 shrink-0 animate-bounce" />
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: color }} />
+            )}
+            <span className="truncate font-sans font-black tracking-wide">
+              @{uniqueId}
+            </span>
+          </div>
         </div>
         
         {/* Colorful small display name or subtext with thick readable text-shadow */}
         <span 
-          className="text-[11px] font-sans font-black max-w-28 truncate select-none text-slate-100 mt-1 opacity-95 tracking-wide"
+          className="text-[11.5px] font-sans font-black max-w-28 truncate select-none text-slate-100 mt-1 opacity-100 tracking-wide"
           style={{ 
-            textShadow: '1.5px 1.5px 0px #000, -1.5px -1.5px 0px #000, 1.5px -1.5px 0px #000, -1.5px 1.5px 0px #000, 0px 1.5px 3px rgba(0,0,0,0.95)' 
+            textShadow: '1.5px 1.5px 0px #000, -1.5px -1.5px 0px #000, 1.5px -1.5px 0px #000, -1.5px 1.5px 0px #000, 0px 2px 4px rgba(0,0,0,1)' 
           }}
         >
           {nickname}
