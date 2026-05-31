@@ -1,0 +1,6 @@
+{
+  "name": "TikTok Stream Avatar",
+  "description": "เอนจิ้นอวตารนำเข้าผู้ชมจาก Stream TikTok ให้มาโลดแล่นอยู่บนจอ แสดงข้อความแชท และเคลื่อนไหวจำลองไลฟ์เสมือนจริง",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
