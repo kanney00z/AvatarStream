@@ -11,9 +11,10 @@ import { Avatar } from '../types';
 interface AvatarRendererProps {
   avatar: Avatar;
   neonGlow?: boolean;
+  onClick?: () => void;
 }
 
-export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow = true }) => {
+export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow = true, onClick }) => {
   const {
     nickname,
     uniqueId,
@@ -359,6 +360,7 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow
 
   return (
     <div
+      onClick={onClick}
       style={{
         position: 'absolute',
         left: `${avatar.x}%`,

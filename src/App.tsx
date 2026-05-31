@@ -710,9 +710,7 @@ export default function App() {
         {/* The Interactive Ground Floor where avatars reside */}
         <div className="absolute inset-0 z-0">
           {avatars.map((av) => (
-            <div key={av.uniqueId}>
-              <AvatarRenderer avatar={av} neonGlow={neonGlow} />
-            </div>
+            <AvatarRenderer key={av.uniqueId} avatar={av} neonGlow={neonGlow} />
           ))}
         </div>
 
@@ -1489,9 +1487,7 @@ export default function App() {
               {/* The Interactive Ground Floor Floor where avatars reside */}
               <div className="absolute inset-0 top-14 bottom-2 z-0">
                 {avatars.map((av) => (
-                  <div key={av.uniqueId} onClick={() => handleAvatarClick(av)} className="cursor-pointer">
-                    <AvatarRenderer avatar={av} neonGlow={neonGlow} />
-                  </div>
+                  <AvatarRenderer key={av.uniqueId} avatar={av} neonGlow={neonGlow} onClick={() => handleAvatarClick(av)} />
                 ))}
 
                 {/* Empty display status callout */}
