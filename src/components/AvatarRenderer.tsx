@@ -483,9 +483,9 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow
         
         {/* Colorful small display name or subtext with thick readable text-shadow */}
         <span 
-          className="text-[11.5px] font-sans font-black max-w-28 truncate select-none text-slate-100 mt-1 opacity-100 tracking-wide"
+          className="text-[11px] font-sans font-extrabold max-w-36 truncate select-none text-white mt-1 opacity-100 leading-normal"
           style={{ 
-            textShadow: '1.5px 1.5px 0px #000, -1.5px -1.5px 0px #000, 1.5px -1.5px 0px #000, -1.5px 1.5px 0px #000, 0px 2px 4px rgba(0,0,0,1)' 
+            textShadow: '1.2px 1.2px 0px #000, -1.2px -1.2px 0px #000, 1.2px -1.2px 0px #000, -1.2px 1.2px 0px #000, 0px 1.5px 3px rgba(0,0,0,1)' 
           }}
         >
           {nickname}
