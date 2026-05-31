@@ -351,27 +351,31 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: -10 }}
             transition={{ type: 'spring', damping: 15, stiffness: 200 }}
-            className="absolute bottom-full mb-3 bg-white/95 text-slate-800 text-sm font-medium py-1.5 px-3 rounded-2xl shadow-xl border border-rose-100 max-w-48 whitespace-normal text-center min-w-16 break-all"
+            className="absolute bottom-full mb-3 text-white text-xs font-bold py-1.5 px-3 rounded-2xl shadow-2xl border-2 max-w-48 whitespace-normal text-center min-w-16 break-all font-sans bg-slate-950/95"
             style={{
               transform: 'translateX(-50%)',
-              boxShadow: '0 10px 25px -5px rgba(244, 63, 94, 0.1), 0 8px 10px -6px rgba(0,0,0,0.05)'
+              borderColor: color,
+              boxShadow: `0 8px 24px ${color}60, 0 0 12px ${color}40`,
             }}
           >
             {/* Small pointed arrow down */}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-white/95" />
+            <div 
+              className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent"
+              style={{ borderTopColor: '#020617' }} // Matches slate-950 background
+            />
             
             {reaction === 'gift' ? (
               <div className="flex flex-col items-center">
-                <span className="text-amber-600 font-bold text-xs flex items-center gap-1">
-                  <Sparkles size={11} className="animate-spin" /> ส่งของขวัญ!
+                <span className="text-amber-400 font-extrabold text-xs flex items-center gap-1 justify-center animate-bounce">
+                  <Sparkles size={11} className="animate-spin text-amber-300" /> ส่งของขวัญ!
                 </span>
-                <span className="text-rose-500 font-extrabold text-[13px] animate-pulse">
+                <span className="text-rose-400 font-black text-sm animate-pulse tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
                   {giftName || 'ของขวัญชิ้นใหญ่'}
                 </span>
-                {comment && <span className="text-slate-600 text-[11px] mt-0.5 line-clamp-2">"{comment}"</span>}
+                {comment && <span className="text-slate-300 text-[11px] mt-0.5 line-clamp-2">"{comment}"</span>}
               </div>
             ) : (
-              <span className="block font-sans">{comment}</span>
+              <span className="block font-sans drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">{comment}</span>
             )}
           </motion.div>
         )}
@@ -386,7 +390,7 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
 
       {/* Sparkle burst backdrop for VIPs or Gifts */}
       {(isVip || reaction === 'gift') && (
-        <div className="absolute inset-0 -m-4 bg-yellow-400/10 rounded-full blur-md animate-ping" style={{ animationDuration: '3s' }} />
+        <div className="absolute inset-0 -m-4 bg-yellow-400/20 rounded-full blur-md animate-ping" style={{ animationDuration: '2s' }} />
       )}
 
       {/* Actual Living Avatar Body Component */}
@@ -399,25 +403,50 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
           ease: 'easeInOut',
         }}
         className="w-14 h-14 relative"
+        style={{
+          filter: `drop-shadow(0 0 8px ${color}dd) drop-shadow(0 0 3px rgba(255, 255, 255, 0.4))`,
+        }}
       >
         {renderAvatarBody()}
       </motion.div>
 
       {/* Text / Username details */}
-      <div className="mt-1 flex flex-col items-center">
+      <div className="mt-1.5 flex flex-col items-center">
         <div
-          className={`px-2 py-0.5 rounded-lg flex items-center gap-1 border shadow-xs max-w-32 truncate ${
+          className={`px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 border shadow-md max-w-32 truncate text-white ${
             isVip
-              ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-white border-amber-400 font-bold text-[11px]'
-              : 'bg-slate-900/80 backdrop-blur-xs text-white border-slate-700/50 text-[10px]'
+              ? 'bg-gradient-to-r from-amber-500 via-pink-500 to-rose-500 border-yellow-300 font-extrabold text-[11px] animate-pulse'
+              : 'bg-slate-950/95 text-[10px]'
           }`}
+          style={
+            !isVip
+              ? {
+                  borderColor: color,
+                  boxShadow: `0 0 8px ${color}b0, inset 0 0 4px ${color}30`,
+                }
+              : {
+                  boxShadow: '0 0 12px rgba(245, 158, 11, 0.8), inset 0 1px 1px rgba(255,255,255,0.2)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                }
+          }
         >
-          {isVip && <Star size={10} className="fill-current text-yellow-300 shrink-0" />}
-          <span className="truncate font-sans font-medium">@{uniqueId}</span>
+          {isVip ? (
+            <Star size={11} className="fill-yellow-300 text-yellow-300 shrink-0 animate-bounce" />
+          ) : (
+            <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: color }} />
+          )}
+          <span className="truncate font-sans font-bold tracking-wide">
+            @{uniqueId}
+          </span>
         </div>
         
-        {/* Subtle small display name or subtext */}
-        <span className="text-[9px] text-slate-400 font-sans max-w-28 truncate select-none opacity-80">
+        {/* Colorful small display name or subtext with thick readable text-shadow */}
+        <span 
+          className="text-[10px] font-sans font-extrabold max-w-28 truncate select-none text-slate-200 mt-0.5"
+          style={{ 
+            textShadow: '1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 0px 1px 2px rgba(0,0,0,0.9)' 
+          }}
+        >
           {nickname}
         </span>
       </div>
