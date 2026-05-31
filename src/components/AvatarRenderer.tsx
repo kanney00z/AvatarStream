@@ -10,9 +10,10 @@ import { Avatar } from '../types';
 
 interface AvatarRendererProps {
   avatar: Avatar;
+  neonGlow?: boolean;
 }
 
-export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
+export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar, neonGlow = true }) => {
   const {
     nickname,
     uniqueId,
@@ -24,10 +25,35 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
     state,
     isVip,
     giftName,
+    profilePicture,
   } = avatar;
 
   // Let's build distinct procedural SVG designs for each avatar type
   const renderAvatarBody = () => {
+    // If we have a profile picture or custom avatar type with image, render the image
+    if ((avatarType === 'custom' || profilePicture) && profilePicture) {
+      return (
+        <div className="w-full h-full relative flex items-center justify-center">
+          {/* Subtle reflection ring */}
+          <div 
+            className="absolute -inset-1 rounded-full border-2 animate-pulse opacity-70"
+            style={{ borderColor: color }}
+          />
+          <img
+            src={profilePicture}
+            alt={nickname}
+            className="w-12 h-12 rounded-full object-cover border-2 shadow-lg scale-105 pointer-events-none"
+            style={{ borderColor: color }}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              // If the custom URL loads with error, fallback to letter container
+              e.currentTarget.style.display = 'none';
+            }}
+          />
+        </div>
+      );
+    }
+
     switch (avatarType) {
       case 'slime':
         return (
@@ -343,6 +369,16 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
       }}
       className="flex flex-col items-center select-none cursor-pointer"
     >
+      {/* Background Soft Aura Glow */}
+      {neonGlow && (
+        <div 
+          className="absolute w-20 h-20 rounded-full blur-xl opacity-50 pointer-events-none -translate-y-6 animate-pulse"
+          style={{
+            background: `radial-gradient(circle, ${color} 0%, transparent 68%)`
+          }}
+        />
+      )}
+
       {/* Speech / Chat / Gift bubble with standard Motion wrapper */}
       <AnimatePresence>
         {comment && (
@@ -355,13 +391,20 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
             style={{
               transform: 'translateX(-50%)',
               borderColor: color,
-              boxShadow: `0 8px 24px ${color}60, 0 0 12px ${color}40`,
+              boxShadow: neonGlow
+                ? `0 0 20px ${color}, 0 4px 12px rgba(0,0,0,0.8), inset 0 0 8px ${color}45`
+                : `0 8px 24px ${color}60, 0 0 12px ${color}40`,
             }}
           >
             {/* Small pointed arrow down */}
             <div 
               className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent"
-              style={{ borderTopColor: '#020617' }} // Matches slate-950 background
+              style={{ borderTopColor: color }} // Matches the glowing color boundary nicely!
+            />
+            {/* Arrow inner filler */}
+            <div 
+              className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent"
+              style={{ borderTopColor: '#020617', marginTop: '-1px' }} // Matches bg-slate-950 background
             />
             
             {reaction === 'gift' ? (
@@ -369,13 +412,13 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
                 <span className="text-amber-400 font-extrabold text-xs flex items-center gap-1 justify-center animate-bounce">
                   <Sparkles size={11} className="animate-spin text-amber-300" /> ส่งของขวัญ!
                 </span>
-                <span className="text-rose-400 font-black text-sm animate-pulse tracking-wide drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
+                <span className="text-rose-400 font-black text-sm animate-pulse tracking-wide drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)]">
                   {giftName || 'ของขวัญชิ้นใหญ่'}
                 </span>
-                {comment && <span className="text-slate-300 text-[11px] mt-0.5 line-clamp-2">"{comment}"</span>}
+                {comment && <span className="text-slate-300 text-[11px] mt-0.5 line-clamp-2" style={{ textShadow: 'none' }}>"{comment}"</span>}
               </div>
             ) : (
-              <span className="block font-sans drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">{comment}</span>
+              <span className="block font-sans drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.8)] leading-tight text-[11px]">{comment}</span>
             )}
           </motion.div>
         )}
@@ -404,29 +447,35 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
         }}
         className="w-14 h-14 relative"
         style={{
-          filter: `drop-shadow(0 0 8px ${color}dd) drop-shadow(0 0 3px rgba(255, 255, 255, 0.4))`,
+          filter: neonGlow
+            ? `drop-shadow(0 0 12px ${color}) drop-shadow(0 0 4px ${color}) drop-shadow(0 0 2px #ffffff)`
+            : `drop-shadow(0 0 8px ${color}dd) drop-shadow(0 0 3px rgba(255, 255, 255, 0.4))`,
         }}
       >
         {renderAvatarBody()}
       </motion.div>
 
       {/* Text / Username details */}
-      <div className="mt-1.5 flex flex-col items-center">
+      <div className="mt-2 flex flex-col items-center">
         <div
-          className={`px-2.5 py-0.5 rounded-lg flex items-center gap-1.5 border shadow-md max-w-32 truncate text-white ${
+          className={`px-2.5 py-1 text-white rounded-lg flex items-center gap-1.5 border-2 shadow-lg max-w-32 truncate hover:scale-105 transition-transform ${
             isVip
               ? 'bg-gradient-to-r from-amber-500 via-pink-500 to-rose-500 border-yellow-300 font-extrabold text-[11px] animate-pulse'
-              : 'bg-slate-950/95 text-[10px]'
+              : 'bg-slate-950/95 text-[10.5px]'
           }`}
           style={
             !isVip
               ? {
                   borderColor: color,
-                  boxShadow: `0 0 8px ${color}b0, inset 0 0 4px ${color}30`,
+                  boxShadow: neonGlow
+                    ? `0 0 15px ${color}, inset 0 0 6px ${color}45`
+                    : `0 0 8px ${color}b0, inset 0 0 4px ${color}30`,
                 }
               : {
-                  boxShadow: '0 0 12px rgba(245, 158, 11, 0.8), inset 0 1px 1px rgba(255,255,255,0.2)',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.6)',
+                  boxShadow: neonGlow
+                    ? '0 0 20px rgba(245, 158, 11, 0.9), inset 0 1px 2px rgba(255,255,255,0.3)'
+                    : '0 0 12px rgba(245, 158, 11, 0.8), inset 0 1px 1px rgba(255,255,255,0.2)',
+                  textShadow: '0 1.5px 3px rgba(0,0,0,0.8)',
                 }
           }
         >
@@ -435,16 +484,16 @@ export const AvatarRenderer: React.FC<AvatarRendererProps> = ({ avatar }) => {
           ) : (
             <span className="w-1.5 h-1.5 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: color }} />
           )}
-          <span className="truncate font-sans font-bold tracking-wide">
+          <span className="truncate font-sans font-black tracking-wide">
             @{uniqueId}
           </span>
         </div>
         
         {/* Colorful small display name or subtext with thick readable text-shadow */}
         <span 
-          className="text-[10px] font-sans font-extrabold max-w-28 truncate select-none text-slate-200 mt-0.5"
+          className="text-[11px] font-sans font-black max-w-28 truncate select-none text-slate-100 mt-1 opacity-95 tracking-wide"
           style={{ 
-            textShadow: '1px 1px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000, 0px 1px 2px rgba(0,0,0,0.9)' 
+            textShadow: '1.5px 1.5px 0px #000, -1.5px -1.5px 0px #000, 1.5px -1.5px 0px #000, -1.5px 1.5px 0px #000, 0px 1.5px 3px rgba(0,0,0,0.95)' 
           }}
         >
           {nickname}

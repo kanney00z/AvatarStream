@@ -70,10 +70,31 @@ const BACKGROUNDS: BackgroundStyle[] = [
   },
   {
     id: 'transparent',
-    name: 'Transparent (เจาะทะลุโปร่งใส - ดึงภาพตรงเข้า OBS)',
+    name: 'Transparent Classy (โปร่งใสธรรมดาไม่มีพื้น)',
     nameTh: 'Transparent',
     className: 'bg-transparent',
     floorColor: 'border-t-0 bg-transparent',
+  },
+  {
+    id: 'transparent-neon-cyan',
+    name: 'Transparent + Neon Cyan (โปร่งใส + พื้นเวทีนีออนฟ้าเรืองแสง ✨)',
+    nameTh: 'Transparent Neon Cyan',
+    className: 'bg-transparent',
+    floorColor: 'border-t-2 border-[#00F2EA] bg-gradient-to-b from-[#00F2EA]/20 via-black/40 to-black/80 shadow-[0_-12px_40px_rgba(0,242,234,0.65),inset_0_1px_15px_rgba(0,242,234,0.4)] backdrop-blur-xs',
+  },
+  {
+    id: 'transparent-neon-pink',
+    name: 'Transparent + Neon Pink (โปร่งใส + พื้นเวทีนีออนชมพูเรืองแสง ✨)',
+    nameTh: 'Transparent Neon Pink',
+    className: 'bg-transparent',
+    floorColor: 'border-t-2 border-[#FF0050] bg-gradient-to-b from-[#FF0050]/20 via-black/40 to-black/80 shadow-[0_-12px_40px_rgba(255,0,80,0.65),inset_0_1px_15px_rgba(255,0,80,0.4)] backdrop-blur-xs',
+  },
+  {
+    id: 'transparent-neon-purple',
+    name: 'Transparent + Neon Purple (โปร่งใส + พื้นเวทีนีออนม่วงวิบวับ ✨)',
+    nameTh: 'Transparent Neon Purple',
+    className: 'bg-transparent',
+    floorColor: 'border-t-2 border-[#a855f7] bg-gradient-to-b from-[#a855f7]/20 via-black/40 to-black/80 shadow-[0_-12px_40px_rgba(168,85,247,0.65),inset_0_1px_15px_rgba(168,85,247,0.4)] backdrop-blur-xs',
   },
 ];
 
@@ -124,6 +145,18 @@ const COLOR_PALETTE = [
   '#a855f7', // purple
 ];
 
+const PRESET_AVATARS = [
+  { name: 'หมา Doge 🐕', url: 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=150' },
+  { name: 'เหมียวส้ม 🐈', url: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=150' },
+  { name: 'นกฮูก 🦉', url: 'https://images.unsplash.com/photo-1509909756405-be0199881695?auto=format&fit=crop&q=80&w=150' },
+  { name: 'เพนกวินจริง 🐧', url: 'https://images.unsplash.com/photo-1598439210625-5067c578f3f6?auto=format&fit=crop&q=80&w=150' },
+  { name: 'หมีน้อย 🧸', url: 'https://images.unsplash.com/photo-1559251606-c623743a6d76?auto=format&fit=crop&q=80&w=150' },
+  { name: 'อิกัวน่ากวน 🦎', url: 'https://images.unsplash.com/photo-1548366086-7f1b76106622?auto=format&fit=crop&q=80&w=150' },
+  { name: 'เมกะบอท 🤖', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=mega' },
+  { name: 'พิกเซลดรากอน 🐲', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=dragon' },
+  { name: 'พิกเซลคิง 👑', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=king' },
+];
+
 export default function App() {
   // App variables states
   const [avatars, setAvatars] = useState<Avatar[]>([]);
@@ -158,6 +191,8 @@ export default function App() {
   const [customNick, setCustomNick] = useState('');
   const [customUser, setCustomUser] = useState('');
   const [customType, setCustomType] = useState<AvatarType>('slime');
+  const [customImgUrl, setCustomImgUrl] = useState('');
+  const [customImgFile, setCustomImgFile] = useState<string | null>(null);
   const [customColor, setCustomColor] = useState(COLOR_PALETTE[0]);
   const [customAction, setCustomAction] = useState<'join' | 'chat' | 'like' | 'follow' | 'gift'>('chat');
   const [customActionVal, setCustomActionVal] = useState('');
@@ -165,6 +200,30 @@ export default function App() {
   // OBS Mode states
   const [isObsMode, setIsObsMode] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Bubble duration settings (in seconds, on-screen persistence of speech bubble. Set to 999999 for permanent display)
+  const [bubbleDuration, setBubbleDuration] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const bParam = params.get('bubble_time');
+      if (bParam) return parseInt(bParam, 10);
+      const saved = localStorage.getItem('bubble_duration');
+      return saved ? parseInt(saved, 10) : 12; // Default to 12 seconds for perfect live visibility
+    }
+    return 12;
+  });
+
+  // Highlight neon aura and strong lighting glow toggle
+  const [neonGlow, setNeonGlow] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const glowParam = params.get('neon_glow');
+      if (glowParam) return glowParam === 'true';
+      const saved = localStorage.getItem('neon_glow');
+      return saved ? saved === 'true' : true; // Default to true (vivid neon!)
+    }
+    return true;
+  });
 
   // Stats Counters
   const [totalChatsRecv, setTotalChatsRecv] = useState(0);
@@ -227,6 +286,7 @@ export default function App() {
     customColor?: string
   ) => {
     const now = Date.now();
+    const durationMs = bubbleDuration === 999999 ? 365 * 24 * 60 * 60 * 1000 : bubbleDuration * 1000;
     
     setAvatars((prevAvatars) => {
       const exists = prevAvatars.find((a) => a.uniqueId === uniqueId);
@@ -247,7 +307,7 @@ export default function App() {
               lastActive: now,
               state: nextActionState,
               comment: actionType === 'chat' ? (actionValue || null) : actionType === 'gift' ? actionValue || null : a.comment,
-              commentExpiresAt: actionType === 'chat' || actionType === 'gift' ? now + 6500 : a.commentExpiresAt,
+              commentExpiresAt: actionType === 'chat' || actionType === 'gift' ? now + durationMs : a.commentExpiresAt,
               reaction: actionType || a.reaction,
               reactionExpiresAt: now + 4000,
               giftName: actionType === 'gift' ? actionValue : a.giftName,
@@ -290,7 +350,7 @@ export default function App() {
           joinedAt: now,
           lastActive: now,
           comment: actionType === 'chat' ? (actionValue || null) : actionType === 'gift' ? actionValue || null : 'เข้ามาดูไลฟ์แล้ว! ✨',
-          commentExpiresAt: now + 5000,
+          commentExpiresAt: now + durationMs,
           reaction: actionType || 'join',
           reactionExpiresAt: now + 3000,
           giftName: actionType === 'gift' ? actionValue : undefined,
@@ -319,7 +379,7 @@ export default function App() {
     } else {
       playSound(293.66, 'sine', 0.1); // D4 slide
     }
-  }, [maxAvatars, selectedAvatarType, playSound, soundEnabled]);
+  }, [maxAvatars, selectedAvatarType, playSound, soundEnabled, bubbleDuration]);
 
 
   // Connect WebSocket logic for the live TikTok server input
@@ -596,11 +656,13 @@ export default function App() {
       actionType = customAction as 'chat' | 'like' | 'follow' | 'gift';
     }
 
+    const pfp = customType === 'custom' ? (customImgFile || customImgUrl || 'https://images.unsplash.com/photo-1544526226-d4568090ffb8?auto=format&fit=crop&q=80&w=150') : undefined;
+
     addLog('success', `🧙 [เสกอวตาร] @${uname} (${nick}) เข้าสู่จอสำเร็จ!`);
     addOrUpdateAvatar(
       uname,
       nick,
-      undefined,
+      pfp,
       actionType,
       customAction === 'chat' || customAction === 'gift' ? customActionVal || 'สวัสดีทุกคนนครับบ! 👋' : undefined,
       customType,
@@ -615,7 +677,7 @@ export default function App() {
 
   const copyObsUrl = () => {
     try {
-      const obsUrl = `${window.location.origin}/?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}`;
+      const obsUrl = `${window.location.origin}/?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}&bubble_time=${bubbleDuration}&neon_glow=${neonGlow}`;
       navigator.clipboard.writeText(obsUrl);
       setCopied(true);
       addLog('success', 'คัดลอกลิงก์ OBS สำเร็จ! พร้อมพอร์ตเชื่อมต่ออัตโนมัติ 🚀');
@@ -649,7 +711,7 @@ export default function App() {
         <div className="absolute inset-0 z-0">
           {avatars.map((av) => (
             <div key={av.uniqueId}>
-              <AvatarRenderer avatar={av} />
+              <AvatarRenderer avatar={av} neonGlow={neonGlow} />
             </div>
           ))}
         </div>
@@ -966,6 +1028,53 @@ export default function App() {
                   </button>
                 </div>
 
+                {/* Vivid Premium Neon Sparkle and Speech Duration controls */}
+                <div className="bg-[#1A1D26] border border-white/5 rounded-xl p-3 space-y-3 font-sans">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#00F2EA]">
+                    ✨ ตกแต่งความมีสีสันสไตล์นีออน
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-slate-300">ความเรืองแสงนีออน (Neon Glow Aura)</span>
+                    <button
+                      onClick={() => {
+                        const nextGlow = !neonGlow;
+                        setNeonGlow(nextGlow);
+                        localStorage.setItem('neon_glow', String(nextGlow));
+                      }}
+                      type="button"
+                      className={`w-10 h-5.5 rounded-full flex items-center px-1 border transition-all cursor-pointer ${
+                        neonGlow 
+                          ? 'bg-[#00F2EA]/20 border-[#00F2EA]/40' 
+                          : 'bg-[#1A1D26] border-white/10'
+                      }`}
+                    >
+                      <div className={`w-3.5 h-3.5 rounded-full transition-all ${
+                        neonGlow ? 'bg-[#00F2EA] translate-x-4' : 'bg-slate-400 translate-x-0'
+                      }`} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] text-slate-400">เวลาค้างกล่องข้อความพูดคุย bubble</label>
+                    <select 
+                      value={bubbleDuration}
+                      onChange={(e) => {
+                        const dur = parseInt(e.target.value, 10);
+                        setBubbleDuration(dur);
+                        localStorage.setItem('bubble_duration', String(dur));
+                      }}
+                      className="w-full bg-[#0A0B0E] border border-white/10 rounded px-2.5 py-1.5 text-xs text-white outline-none focus:border-[#00F2EA]/50 transition-colors cursor-pointer"
+                    >
+                      <option value={5}>⚡ 5 วินาที (เร็ว)</option>
+                      <option value={12}>💬 12 วินาที (แนะนำ)</option>
+                      <option value={30}>🕒 30 วินาที (ปานกลาง)</option>
+                      <option value={60}>⏱️ 1 นาที (คงอยู่ยาว)</option>
+                      <option value={999999}>♾️ ไม่จำกัด (ค้างตลอดจนกว่าจะมีแชทใหม่มาทับ)</option>
+                    </select>
+                  </div>
+                </div>
+
                 {/* OBS Integration Link Generator */}
                 <div className="bg-[#1A1D26] border border-white/5 rounded-xl p-3 space-y-2.5 mt-2 font-sans">
                   <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#00F2EA]">
@@ -980,13 +1089,18 @@ export default function App() {
                       ⚠️ ข้อควรระวังสูงสุด
                     </p>
                     <p className="text-[9px] text-slate-300 leading-normal">
-                      <strong>ห้ามเอาลิ้งก์ "ws://localhost:62024" ไปใส่ใน OBS เด็ดขาด!</strong> (แบบในรูปที่คุณแคปมา) ช่อง URL ใน OBS ต้องใช้เป็นที่อยู่เว็บแอปด้านล่างนี้เท่านั้นครับ!
+                      <strong>ห้ามเอาลิ้งก์ "ws://localhost:62024" ไปใส่ใน OBS เด็ดขาด!</strong> ช่อง URL ใน OBS ต้องใช้เป็นที่อยู่เว็บแอปด้านล่างนี้เท่านั้นครับ!
                     </p>
                   </div>
 
                   <div className="flex gap-1.5">
                     <div className="flex-1 min-w-0 bg-[#0A0B0E] border border-white/5 rounded px-2 py-1.5 text-[9px] font-mono text-slate-400 truncate tracking-tight flex items-center justify-between">
-                      <span className="truncate select-all">{typeof window !== 'undefined' ? `${window.location.origin}/?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}` : `?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}`}</span>
+                      <span className="truncate select-all">
+                        {typeof window !== 'undefined' 
+                          ? `${window.location.origin}/?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}&bubble_time=${bubbleDuration}&neon_glow=${neonGlow}` 
+                          : `?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}&bubble_time=${bubbleDuration}&neon_glow=${neonGlow}`
+                        }
+                      </span>
                       <span className="text-[8px] text-[#00F2EA] font-extrabold tracking-wider shrink-0 select-none ml-1">WEB URL</span>
                     </div>
                     <button
@@ -1110,8 +1224,112 @@ export default function App() {
                     <option value="astronaut">🧑‍🚀 มนุษย์อวกาศ (Astronaut)</option>
                     <option value="penguin">🐧 เพนกวินดุ๊กดิ๊ก (Penguin)</option>
                     <option value="axolotl">🌸 หมาน้ำแต่อมยิ้ม (Axolotl)</option>
+                    <option value="custom">🖼️ หาอวตารใส่เอง/อัปโหลดรูปภาพ (Custom Image)</option>
                   </select>
                 </div>
+
+                {customType === 'custom' && (
+                  <div className="bg-[#181B27]/80 rounded-xl p-3 border border-white/5 space-y-3 animate-fade-in text-sans">
+                    <div className="flex flex-col space-y-1">
+                      <span className="text-[10px] text-[#00F2EA] font-extrabold uppercase tracking-widest">
+                        🖼️ ตั้งค่าอวตารรูปของคุณเอง (Custom Image Avatar)
+                      </span>
+                      <p className="text-[9px] text-slate-400">รูปภาพของคุณจะถูกนำเสนอลอยประดับแสงออร่าแสนน่ารักรอบตัวละคร!</p>
+                    </div>
+
+                    {/* File Upload Zone */}
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">อัปโหลดไฟล์ในเครื่องคอมพิวเตอร์:</span>
+                      <div className="relative border border-dashed border-white/15 rounded-lg p-3 hover:border-[#00F2EA]/40 transition-colors bg-black/25 flex flex-col items-center justify-center text-center cursor-pointer group">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                setCustomImgFile(event.target?.result as string);
+                                setCustomImgUrl(''); // Clear url input
+                                addLog('success', `อัปโหลดรูปอวตารสำเร็จ: ${file.name} 🎉`);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        {customImgFile ? (
+                          <div className="flex items-center gap-2">
+                            <img src={customImgFile} className="w-8 h-8 rounded-full object-cover border border-[#00F2EA]" alt="preview" />
+                            <div className="text-left">
+                              <p className="text-[10px] font-bold text-emerald-400">โหลดไฟล์เสร็จสิ้น!</p>
+                              <p className="text-[8px] text-slate-400">คลิกลากรูปภาพใหม่เพื่อเปลี่ยน</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-0.5">
+                            <p className="text-[10px] text-slate-300 font-bold group-hover:text-[#00F2EA] transition-colors">
+                              📁 คลิกที่นี่เพื่อลากวางไฟล์รูป (Drag or click)
+                            </p>
+                            <p className="text-[8px] text-slate-500">รองรับ GIF, PNG (แบบใส), JPG</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Image URL Input */}
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase">หรือวางลิงก์รูปภาพจากเน็ต (Image URL):</span>
+                      <div className="flex gap-1">
+                        <input
+                          type="text"
+                          value={customImgUrl}
+                          onChange={(e) => {
+                            setCustomImgUrl(e.target.value);
+                            setCustomImgFile(null); // Clear file data
+                          }}
+                          placeholder="https://example.com/chibi.png"
+                          className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-xs text-white placeholder-slate-600 outline-none focus:border-[#00F2EA]/40 font-mono text-[9px]"
+                        />
+                        {customImgUrl && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomImgUrl('');
+                            }}
+                            className="text-slate-500 hover:text-rose-400 p-1"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Choose from adorable templates */}
+                    <div className="space-y-1.5">
+                      <span className="text-[9px] text-[#00F2EA] font-extrabold uppercase tracking-wider block">🎉 หรือเลือกใช้รูปจำลองน่ารักๆ สำเร็จรูป:</span>
+                      <div className="grid grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-0.5">
+                        {PRESET_AVATARS.map((p) => (
+                          <button
+                            key={p.name}
+                            type="button"
+                            onClick={() => {
+                              setCustomImgUrl(p.url);
+                              setCustomImgFile(null);
+                              addLog('info', `เลือกด่วน: ${p.name}`);
+                            }}
+                            className={`p-1 border rounded bg-black/15 flex flex-col items-center justify-center text-center gap-1 cursor-pointer transition-all hover:bg-[#00F2EA]/10 hover:border-[#00F2EA]/30 ${
+                              customImgUrl === p.url ? 'border-[#00F2EA] bg-[#00F2EA]/5 shadow-md' : 'border-white/5'
+                            }`}
+                          >
+                            <img src={p.url} className="w-8 h-8 rounded-full object-cover border border-white/5" alt={p.name} />
+                            <span className="text-[8px] text-slate-300 truncate w-full font-sans">{p.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1">
                   <label className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">เลือกสีอวตาร</label>
@@ -1272,7 +1490,7 @@ export default function App() {
               <div className="absolute inset-0 top-14 bottom-2 z-0">
                 {avatars.map((av) => (
                   <div key={av.uniqueId} onClick={() => handleAvatarClick(av)} className="cursor-pointer">
-                    <AvatarRenderer avatar={av} />
+                    <AvatarRenderer avatar={av} neonGlow={neonGlow} />
                   </div>
                 ))}
 

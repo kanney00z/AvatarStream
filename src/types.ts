@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AvatarType = 'slime' | 'cute-golem' | 'bunny' | 'wizard' | 'astronaut' | 'penguin' | 'axolotl';
+export type AvatarType = 'slime' | 'cute-golem' | 'bunny' | 'wizard' | 'astronaut' | 'penguin' | 'axolotl' | 'custom';
 
 export interface Avatar {
   uniqueId: string;
