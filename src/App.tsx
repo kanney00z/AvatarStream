@@ -68,6 +68,13 @@ const BACKGROUNDS: BackgroundStyle[] = [
     className: 'bg-[#0000ff]',
     floorColor: 'border-t border-black/10 bg-[#0000ff]',
   },
+  {
+    id: 'transparent',
+    name: 'Transparent (เจาะทะลุโปร่งใส - ดึงภาพตรงเข้า OBS)',
+    nameTh: 'Transparent',
+    className: 'bg-transparent',
+    floorColor: 'border-t-0 bg-transparent',
+  },
 ];
 
 // Seed lists to simulate organic viewers quickly
