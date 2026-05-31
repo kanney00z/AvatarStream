@@ -120,7 +120,16 @@ const COLOR_PALETTE = [
 export default function App() {
   // App variables states
   const [avatars, setAvatars] = useState<Avatar[]>([]);
-  const [wsUrl, setWsUrl] = useState('ws://localhost:62024');
+  const [wsUrl, setWsUrl] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const wsParam = params.get('ws');
+      if (wsParam) return wsParam;
+      return localStorage.getItem('ws_url') || 'ws://localhost:62024';
+    }
+    return 'ws://localhost:62024';
+  });
+  const [shouldReconnect, setShouldReconnect] = useState(true);
   const [connection, setConnection] = useState<ConnectionState>('disconnected');
   const [logs, setLogs] = useState<LogMessage[]>([]);
   const [currentBg, setCurrentBg] = useState<BackgroundStyle>(BACKGROUNDS[1]); // Default to neon-grid
@@ -308,6 +317,7 @@ export default function App() {
 
   // Connect WebSocket logic for the live TikTok server input
   const connectWebSocket = useCallback((urlInput: string) => {
+    setShouldReconnect(true);
     if (wsRef.current) {
       wsRef.current.close();
     }
@@ -392,17 +402,45 @@ export default function App() {
       wsRef.current.close();
       wsRef.current = null;
       setConnection('disconnected');
-      addLog('info', 'ตัดการเชื่อมต่อ WebSocket แล้ว');
+      setShouldReconnect(false);
+      addLog('info', 'ตัดการเชื่อมต่อ WebSocket แล้ว (ปิดระบบเชื่อมต่ออัตโนมัติ)');
     }
   }, [addLog]);
+
+  // Auto reconnection loop for real-time stream stability
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (shouldReconnect && (connection === 'disconnected' || connection === 'error')) {
+      timer = setTimeout(() => {
+        addLog('info', '🔄 กำลังส่งสัญญาณดึงข้อมูลจากโปรแกรมจำลองอัตโนมัติแบบ Real-time...');
+        connectWebSocket(wsUrl);
+      }, 5000); // Retry every 5 seconds
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [connection, wsUrl, shouldReconnect, connectWebSocket, addLog]);
 
   // Handle auto connection on load or input changes
   useEffect(() => {
     // Attempt connecting on mount
-    connectWebSocket(wsUrl);
+    const params = new URLSearchParams(window.location.search);
+    const wsParam = params.get('ws');
+    const finalWsUrl = wsParam || localStorage.getItem('ws_url') || wsUrl;
+    
+    if (wsParam) {
+      setWsUrl(wsParam);
+    } else {
+      const saved = localStorage.getItem('ws_url');
+      if (saved) {
+        setWsUrl(saved);
+      }
+    }
+
+    // Try starting initial connection
+    connectWebSocket(finalWsUrl);
 
     // Read URL search parameters for OBS mode layout
-    const params = new URLSearchParams(window.location.search);
     if (params.get('obs') === 'true') {
       setIsObsMode(true);
     }
@@ -570,10 +608,10 @@ export default function App() {
 
   const copyObsUrl = () => {
     try {
-      const obsUrl = `${window.location.origin}/?obs=true&bg=${currentBg.id}`;
+      const obsUrl = `${window.location.origin}/?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}`;
       navigator.clipboard.writeText(obsUrl);
       setCopied(true);
-      addLog('success', 'คัดลอกลิงก์ OBS สำเร็จ! นำไปวางใน OBS Browser Source ได้เลย 🚀');
+      addLog('success', 'คัดลอกลิงก์ OBS สำเร็จ! พร้อมพอร์ตเชื่อมต่ออัตโนมัติ 🚀');
       setTimeout(() => setCopied(false), 2500);
     } catch (err) {
       addLog('error', 'ไม่สามารถคัดลอกได้อัตโนมัติ กรุณาคัดลอกจากกล่องข้อความ');
@@ -777,7 +815,11 @@ export default function App() {
                     <input 
                       type="text"
                       value={wsUrl}
-                      onChange={(e) => setWsUrl(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setWsUrl(val);
+                        localStorage.setItem('ws_url', val);
+                      }}
                       placeholder="ws://localhost:62024"
                       className="flex-1 min-w-0 bg-[#0A0B0E] border border-white/10 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-[#00F2EA]/40 font-mono"
                     />
@@ -937,7 +979,7 @@ export default function App() {
 
                   <div className="flex gap-1.5">
                     <div className="flex-1 min-w-0 bg-[#0A0B0E] border border-white/5 rounded px-2 py-1.5 text-[9px] font-mono text-slate-400 truncate tracking-tight flex items-center justify-between">
-                      <span className="truncate select-all">{typeof window !== 'undefined' ? `${window.location.origin}/?obs=true&bg=${currentBg.id}` : `?obs=true&bg=${currentBg.id}`}</span>
+                      <span className="truncate select-all">{typeof window !== 'undefined' ? `${window.location.origin}/?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}` : `?obs=true&bg=${currentBg.id}&ws=${encodeURIComponent(wsUrl)}`}</span>
                       <span className="text-[8px] text-[#00F2EA] font-extrabold tracking-wider shrink-0 select-none ml-1">WEB URL</span>
                     </div>
                     <button
